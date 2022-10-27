@@ -1,0 +1,68 @@
+from pytrends.request import TrendReq
+from newsapi import NewsApiClient
+import pandas as pd
+import sqlite3
+import datetime as nw_date
+import os
+
+newsapi = NewsApiClient(api_key='58300fbd7ecd4292aa155c02b89d88a1')
+
+nw_db=sqlite3.connect("new_db.db")
+db_cur=nw_db.cursor()
+db_cur.execute("SELECT * FROM news_data")
+dt=db_cur.fetchall()
+id=len(dt)+1
+
+temp=pd.DataFrame()
+
+os.system('cls')
+print("3. entertainment\n12. business\n20. sports\n45. health\n174. technology\nscience")
+print("\nEnter yout desired category")
+cat=str(input())
+cat1=str(input())
+
+os.system('cls')
+print("argentina(AR)\naustralia(AU)\nbrazil(BR)\ncanada(CA)\negypt(EG)\nfinland(FI)\ngreece(GR)\nindia(IN)\nitaly(IT)")
+print("ireland(IE)\nisrael(IL)\nbelguim(BE)\nkenya(KE)\nmalaysia(MY)\nmexico(MX)\nnetherlands(NL)\nnew_zealand(NZ)")
+print("sweden(SE)\nswitzerland(SZ)\nthailand(TH)\nturkey(TR)\nunited_kingdom(GB)\nunited_states(US)\ngermany(DE)\n")
+print("Enter country followed by its code")
+loc=str(input())
+loc1=str(input())
+
+os.system('cls')
+pytrend = TrendReq( )
+#tr_keys=pytrend.trending_searches(loc1)
+tr_keys=pytrend.realtime_trending_searches(loc)
+x1=len(tr_keys)
+
+if  x1>25:
+    x1=25
+
+for x in range(x1):
+    kw4 = tr_keys.iloc[x,0]
+    kw5=kw4.rsplit(" ")
+    kw6=kw5[0:5]
+    pytrend.build_payload(kw6, cat=cat, timeframe='now 1-d', geo=loc, gprop='')
+    rel_keys = pytrend.related_queries()
+    rel_res1 = list(rel_keys.values())[0]['top']
+    tp = type(rel_res1)
+    tp2 = type(temp)
+    if tp == tp2:
+        rel_res2=rel_res1['query'].iloc[0]
+        print(rel_res2)
+        nw_key = newsapi.get_top_headlines(q=rel_res2, language='en', country=loc1)
+        nw_art = nw_key['articles']
+        nw_art_sz=len(nw_art)
+        if nw_art_sz!=0:
+            for i in range(nw_art_sz):
+                nw_t = nw_art[i]['title']
+                nw_desc = nw_art[i]['description']
+                nw_link = nw_art[i]['url']
+                print(nw_t)
+                print(nw_desc)
+                print(nw_link)
+                db_cur.execute("INSERT INTO news_data VALUES (?,?,?,?,?,?,?)",(id,cat,loc,'2022-10-24',nw_t,nw_desc,nw_link))
+                id=id+1
+
+nw_db.commit()
+nw_db.close()

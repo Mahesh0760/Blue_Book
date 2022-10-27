@@ -1,0 +1,49 @@
+from GoogleNews import GoogleNews
+from pytrends.request import TrendReq
+import pandas as pd
+import os
+
+os.system('cls')
+print("3.  Entertainment\n34. Movies\n35. Music\n22. Books\n5. Computers & Electronics\n7. Finance\n8. Games")
+print("12. Business & Industrial\n14. People & society\n18. Shopping\n19. Law & Government\n22. Books & Literature")
+print("22. Books & Literature\n20. Sports\n20. Sports\n29. Real Estate\n45. Health\n67. Travel\n174. Science\n")
+print("\nEnter your desired category")
+cat1=str(input())
+
+os.system('cls')
+print("argentina(AR)\naustralia(AU)\nbrazil(BR)\ncanada(CA)\negypt(EG)\nfinland(FI)\ngreece(GR)\nindia(IN)\nitaly(IT)")
+print("ireland(IE)\nisrael(IL)\nbelguim(BE)\nkenya(KE)\nmalaysia(MY)\nmexico(MX)\nnetherlands(NL)\nnew_zealand(NZ)")
+print("sweden(SE)\nswitzerland(SZ)\nthailand(TH)\nturkey(TR)\nunited_kingdom(GB)\nunited_states(US)\ngermany(DE)\n")
+print("Enter country followed by its code")
+
+loc2=str(input())
+os.system('cls')
+
+pytrend = TrendReq( )
+tr_keys=pytrend.realtime_trending_searches(loc2,'all')
+
+x1=len(tr_keys)
+if x1>25:
+    x1=25
+
+for x in range(x1):
+    kw4 = tr_keys.iloc[x,0]
+    kw5=kw4.rsplit(" ")
+    kw6=kw5[0:5]
+    pytrend.build_payload(kw6, cat=cat1, timeframe='now 1-d', geo=loc2, gprop='')
+    rel_keys = pytrend.related_queries()
+    rel_res1 = list(rel_keys.values())[0]['top']
+    rel_res11 = pd.DataFrame(rel_res1)
+    kw_size=len(rel_res11)
+    if kw_size!=0:
+        rel_res111=rel_res11.iloc[0].to_string()
+        tr_nw = GoogleNews(period='1d')
+        tr_nw.search(rel_res111)
+        tr_nw_rs = tr_nw.result()
+        data = pd.DataFrame.from_dict(tr_nw_rs)
+        c = len(data)
+        if c != 0:
+            for disp in tr_nw_rs:
+                print("\n\nTitle : ", disp["title"])
+                print("News : ", disp["desc"])
+                print("Read Full News : ", disp["link"])
